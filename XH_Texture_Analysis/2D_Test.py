@@ -14,6 +14,7 @@ import SimpleITK as sitk
 import nibabel as nib
 import numpy as np
 from radiomics import shape2D
+import pandas as pd
 
 
 # %% Make a 2D analysis -> Healthy patient
@@ -62,7 +63,7 @@ for i in range(imageName_healthy.shape[2]):
     ni_img = nib.Nifti1Image(output, affine=np.eye(4))
     nib.save(ni_img, xh_folder_healthy+'/'+'VentilationDefect_{0}.nii.gz'.format(i))
 
-    print('VentilationImage_{0}.nii.gz and MaskImage_{0}.nii.gz'.format(i))
+    print('VentilationImage_{0}.nii.gz, MaskImage_{0}.nii.gz & VentilationDefect_{0}.nii.gz'.format(i))
 print(' ')
 
 # # Sanity Check
@@ -79,6 +80,7 @@ print(' ')
 #     plt.title(f"Image, no defects #{i}")
 
 # %% To obtain the features slice by slice, 2D.
+flag = 0
 for i in range(imageName_healthy.shape[2]):
     path_image = os.path.join(xh_folder_healthy,'VentilationImage_{0}.nii.gz').format(i) 
     path_defect = os.path.join(xh_folder_healthy,'VentilationDefect_{0}.nii.gz').format(i)
@@ -95,15 +97,28 @@ for i in range(imageName_healthy.shape[2]):
 
     for featureName in featureVector.keys():
         print("Computed %s: %s" % (featureName, featureVector[featureName]))
+        df = pd.DataFrame(featureVector.keys(),columns=['Features'])
+        df_2 = pd.DataFrame(featureVector.values(),columns=['Measurements'])
+    
+    # Add all the measurements for each slice in different columns
+    if flag == 0:
+        df_merged_healthy = pd.concat([df, df_2], axis=1)
+    else:
+        df_merged_healthy = pd.concat([df_merged_healthy, df_2], axis=1)
+    flag = 1
+    
     print(' ')
 
     plt.figure(figsize=(10,10))
-    plt.subplot(2,2,1)
+    plt.subplot(1,3,1)
     plt.imshow(np.rot90(sitk.GetArrayFromImage(imageName),2), cmap="gray")
     plt.title(f"Ventilation #{i}")
-    plt.subplot(2,2,2)
-    plt.imshow(np.rot90(sitk.GetArrayFromImage(defectName),2))        
-    plt.title(f"Mask #{i}")
+    plt.subplot(1,3,2)
+    plt.imshow(np.rot90(sitk.GetArrayFromImage(defectName),2), cmap="gray")        
+    plt.title(f"Mask-defects #{i}")
+    plt.subplot(1,3,3)
+    plt.imshow(np.rot90(sitk.GetArrayFromImage(imageName*defectName),2), cmap="gray")        
+    plt.title(f"Without defects #{i}")
 
 
 # %% Make a 2D analysis -> Lam patient
@@ -152,7 +167,7 @@ for i in range(imageName_Lam.shape[2]):
     ni_img = nib.Nifti1Image(output, affine=np.eye(4))
     nib.save(ni_img, xh_folder_Lam+'/'+'VentilationDefect_{0}.nii.gz'.format(i))
 
-    print('VentilationImage_{0}.nii.gz and MaskImage_{0}.nii.gz'.format(i))
+    print('VentilationImage_{0}.nii.gz, MaskImage_{0}.nii.gz & VentilationDefect_{0}.nii.gz'.format(i))
 print(' ')
 
 # # Sanity Check
@@ -169,6 +184,7 @@ print(' ')
 #     plt.title(f"Image, no defects #{i}")
 
 # %% To obtain the features slice by slice, 2D.
+flag = 0
 for i in range(imageName_Lam.shape[2]):
     path_image = os.path.join(xh_folder_Lam,'VentilationImage_{0}.nii.gz').format(i) 
     path_defect = os.path.join(xh_folder_Lam,'VentilationDefect_{0}.nii.gz').format(i)
@@ -185,15 +201,28 @@ for i in range(imageName_Lam.shape[2]):
 
     for featureName in featureVector.keys():
         print("Computed %s: %s" % (featureName, featureVector[featureName]))
+        df = pd.DataFrame(featureVector.keys(),columns=['Features'])
+        df_2 = pd.DataFrame(featureVector.values(),columns=['Measurements'])
+    
+    # Add all the measurements for each slice in different columns
+    if flag == 0:
+        df_merged_Lam = pd.concat([df, df_2], axis=1)
+    else:
+        df_merged_Lam = pd.concat([df_merged_Lam, df_2], axis=1)
+    flag = 1
+
     print(' ')
 
     plt.figure(figsize=(10,10))
-    plt.subplot(2,2,1)
+    plt.subplot(1,3,1)
     plt.imshow(np.rot90(sitk.GetArrayFromImage(imageName),2), cmap="gray")
     plt.title(f"Ventilation #{i}")
-    plt.subplot(2,2,2)
-    plt.imshow(np.rot90(sitk.GetArrayFromImage(defectName),2))        
-    plt.title(f"Mask #{i}")
+    plt.subplot(1,3,2)
+    plt.imshow(np.rot90(sitk.GetArrayFromImage(defectName),2), cmap="gray")        
+    plt.title(f"Mask-defects #{i}")
+    plt.subplot(1,3,3)
+    plt.imshow(np.rot90(sitk.GetArrayFromImage(imageName*defectName),2), cmap="gray")        
+    plt.title(f"Without defects #{i}")
 
 
 
@@ -243,7 +272,7 @@ for i in range(imageName_patchy.shape[2]):
     ni_img = nib.Nifti1Image(output, affine=np.eye(4))
     nib.save(ni_img, xh_folder_patchy+'/'+'VentilationDefect_{0}.nii.gz'.format(i))
 
-    print('VentilationImage_{0}.nii.gz and MaskImage_{0}.nii.gz'.format(i))
+    print('VentilationImage_{0}.nii.gz, MaskImage_{0}.nii.gz & VentilationDefect_{0}.nii.gz'.format(i))
 print(' ')
 
 # # Sanity Check
@@ -260,6 +289,11 @@ print(' ')
 #     plt.title(f"Image, no defects #{i}")
 
 # %% To obtain the features slice by slice, 2D.
+
+# Main path
+path = '/home/hoyeh3/GitHub-wsl2/pyradiomics/XH_Texture_Analysis'
+
+flag = 0
 for i in range(imageName_patchy.shape[2]):
     path_image = os.path.join(xh_folder_patchy,'VentilationImage_{0}.nii.gz').format(i) 
     path_defect = os.path.join(xh_folder_patchy,'VentilationDefect_{0}.nii.gz').format(i)
@@ -276,12 +310,32 @@ for i in range(imageName_patchy.shape[2]):
 
     for featureName in featureVector.keys():
         print("Computed %s: %s" % (featureName, featureVector[featureName]))
+        df = pd.DataFrame(featureVector.keys(),columns=['Features'])
+        df_2 = pd.DataFrame(featureVector.values(),columns=['Measurements'])
+
+    # Add all the measurements for each slice in different columns
+    if flag == 0:
+        df_merged_patchy = pd.concat([df, df_2], axis=1)
+    else:
+        df_merged_patchy = pd.concat([df_merged_patchy, df_2], axis=1)
+    flag = 1
+
     print(' ')
 
     plt.figure(figsize=(10,10))
-    plt.subplot(2,2,1)
+    plt.subplot(1,3,1)
     plt.imshow(np.rot90(sitk.GetArrayFromImage(imageName),2), cmap="gray")
     plt.title(f"Ventilation #{i}")
-    plt.subplot(2,2,2)
-    plt.imshow(np.rot90(sitk.GetArrayFromImage(defectName),2))        
-    plt.title(f"Mask #{i}")
+    plt.subplot(1,3,2)
+    plt.imshow(np.rot90(sitk.GetArrayFromImage(defectName),2), cmap="gray")        
+    plt.title(f"Mask-defects #{i}")
+    plt.subplot(1,3,3)
+    plt.imshow(np.rot90(sitk.GetArrayFromImage(imageName*defectName),2), cmap="gray")        
+    plt.title(f"Without defects #{i}")
+
+# %% Store data in an Excel sheet
+
+with pd.ExcelWriter(path+'/Features_2D.xlsx') as writer:
+    df_merged_healthy.to_excel(writer, sheet_name="Healthy", index=False)
+    df_merged_Lam.to_excel(writer, sheet_name="Lam", index=False)
+    df_merged_patchy.to_excel(writer, sheet_name="Patchy", index=False)
