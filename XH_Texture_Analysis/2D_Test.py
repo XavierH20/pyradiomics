@@ -333,8 +333,46 @@ for i in range(imageName_patchy.shape[2]):
     plt.imshow(np.rot90(sitk.GetArrayFromImage(imageName*defectName),2), cmap="gray")        
     plt.title(f"Without defects #{i}")
 
-# %% Store data in an Excel sheet
+# %% Mean, std, median and store data in Excel document
 
+# Remove any column with NaN values
+df_merged_healthy = df_merged_healthy.dropna(axis=1, how='any')
+df_merged_Lam = df_merged_Lam.dropna(axis=1, how='any')
+df_merged_patchy = df_merged_patchy.dropna(axis=1, how='any')
+
+# Obtain the mean 
+df_healthy_mean = df_merged_healthy['Measurements'].mean(axis=1, skipna = True)
+df_Lam_mean = df_merged_Lam['Measurements'].mean(axis=1, skipna = True)
+df_patchy_mean = df_merged_patchy['Measurements'].mean(axis=1, skipna = True)
+
+df_healthy_mean = pd.DataFrame(df_patchy_mean,columns=['Mean'])
+df_Lam_mean = pd.DataFrame(df_Lam_mean,columns=['Mean'])
+df_patchy_mean = pd.DataFrame(df_patchy_mean,columns=['Mean'])
+
+# Obtain the std
+df_healthy_std = df_merged_healthy['Measurements'].std(axis=1, skipna = True)
+df_Lam_std = df_merged_Lam['Measurements'].std(axis=1, skipna = True)
+df_patchy_std = df_merged_patchy['Measurements'].std(axis=1, skipna = True)
+
+df_healthy_std = pd.DataFrame(df_healthy_std,columns=['SD'])
+df_Lam_std = pd.DataFrame(df_Lam_std,columns=['SD'])
+df_patchy_std = pd.DataFrame(df_patchy_std,columns=['SD'])
+
+# Obtain median
+df_healthy_median = np.median(df_merged_healthy['Measurements'].values,axis=1)
+df_Lam_median = np.median(df_merged_Lam['Measurements'].values,axis=1)
+df_patchy_median = np.median(df_merged_patchy['Measurements'].values,axis=1)
+
+df_healthy_median = pd.DataFrame(df_healthy_median,columns=['Median'])
+df_Lam_median = pd.DataFrame(df_Lam_median,columns=['Median'])
+df_patchy_median = pd.DataFrame(df_patchy_median,columns=['Median'])
+
+# Join the Mean SD, and median to the original feature dataframe
+df_merged_healthy = pd.concat([df_merged_healthy, df_healthy_mean,df_healthy_std,df_healthy_median], axis=1)
+df_merged_Lam = pd.concat([df_merged_Lam, df_Lam_mean,df_Lam_std,df_Lam_median], axis=1)
+df_merged_patchy = pd.concat([df_merged_patchy, df_patchy_mean,df_patchy_std,df_patchy_median], axis=1)
+
+# Store data in an Excel sheet
 with pd.ExcelWriter(path+'/Features_2D.xlsx') as writer:
     df_merged_healthy.to_excel(writer, sheet_name="Healthy", index=False)
     df_merged_Lam.to_excel(writer, sheet_name="Lam", index=False)
