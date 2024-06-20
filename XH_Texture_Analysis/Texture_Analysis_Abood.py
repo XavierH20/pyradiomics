@@ -240,6 +240,11 @@ if imageName_Lam_patchy is None or maskName_Lam_patchy is None:
 extractor = featureextractor.RadiomicsFeatureExtractor(paramsFile)
 featureClasses = getFeatureClasses()
 
+# Origin and Spacing are not the same between the image and the defect mask. 
+# This sets the parameters to be the same between the image and defect
+imageName_Lam_patchy.SetOrigin(mask_defect_sitk_Lam_patchy.GetOrigin())
+imageName_Lam_patchy.SetSpacing(mask_defect_sitk_Lam_patchy.GetSpacing())
+
 # Print each calculation from the features
 print("Calculating features")
 featureVector = extractor.execute(imageName_Lam_patchy, mask_defect_sitk_Lam_patchy)
@@ -250,9 +255,6 @@ for featureName in featureVector.keys():
 df = pd.DataFrame(featureVector.keys(),columns=['Features'])
 df_2 = pd.DataFrame(featureVector.values(),columns=['Measurements'])
 df_merged_Lam_patchy = pd.concat([df, df_2], axis=1)
-
-
-
 
 
 
@@ -267,8 +269,9 @@ df_merged_Lam_filt_patchy = df_merged_Lam_patchy.iloc[22:]
 with pd.ExcelWriter(path+'/Features.xlsx') as writer:
     df_merged_control.to_excel(writer, sheet_name="Control", index=False)
     df_merged_Lam.to_excel(writer, sheet_name="Lam", index=False)
-    df_merged_Lam_patchy.to_excel(writer, sheet_name="Lam", index=False)
+    df_merged_Lam_patchy.to_excel(writer, sheet_name="Patchy", index=False)
+
     df_merged_control_filt.to_excel(writer, sheet_name="Control_filt", index=False)
     df_merged_Lam_filt.to_excel(writer, sheet_name="Lam_filt", index=False)
-    df_merged_Lam_filt_patchy.to_excel(writer, sheet_name="Lam_filt", index=False)
+    df_merged_Lam_filt_patchy.to_excel(writer, sheet_name="Patchy_filt", index=False)
 
