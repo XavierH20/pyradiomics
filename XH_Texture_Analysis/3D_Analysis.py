@@ -242,6 +242,8 @@ featureClasses = getFeatureClasses()
 
 # Origin and Spacing are not the same between the image and the defect mask. 
 # This sets the parameters to be the same between the image and defect
+# Webpage for reference: https://github.com/SimpleITK/SimpleITK/issues/561
+
 imageName_Lam_patchy.SetOrigin(mask_defect_sitk_Lam_patchy.GetOrigin())
 imageName_Lam_patchy.SetSpacing(mask_defect_sitk_Lam_patchy.GetSpacing())
 
