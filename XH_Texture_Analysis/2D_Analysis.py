@@ -345,7 +345,7 @@ df_healthy_mean = df_merged_healthy['Measurements'].mean(axis=1, skipna = True)
 df_Lam_mean = df_merged_Lam['Measurements'].mean(axis=1, skipna = True)
 df_patchy_mean = df_merged_patchy['Measurements'].mean(axis=1, skipna = True)
 
-df_healthy_mean = pd.DataFrame(df_patchy_mean,columns=['Mean'])
+df_healthy_mean = pd.DataFrame(df_healthy_mean,columns=['Mean'])
 df_Lam_mean = pd.DataFrame(df_Lam_mean,columns=['Mean'])
 df_patchy_mean = pd.DataFrame(df_patchy_mean,columns=['Mean'])
 
