@@ -7,7 +7,6 @@ import os
 
 import six
 
-import radiomics
 from radiomics import featureextractor, getFeatureClasses
 
 import matplotlib.pyplot as plt
@@ -29,10 +28,20 @@ paramsFile = os.path.abspath(os.path.join(path,'Settings', 'Params.yaml'))
 extractor = featureextractor.RadiomicsFeatureExtractor(paramsFile)
 featureClasses = getFeatureClasses()
 
-# Enable features settings. i.e. Force 2D
-# settings = {}
-# settings['force2D'] = True
-# extractor = featureextractor.RadiomicsFeatureExtractor(**settings) 
+# # Enable features settings. i.e. Force 2D
+# # https://pyradiomics.readthedocs.io/en/latest/features.html
+settings = {}
+settings['force2D'] = True
+settings['force2Ddimension'] = 1  # 0 for axial slices (default), 1 for coronal slices, 2 for sagittal.
+extractor = featureextractor.RadiomicsFeatureExtractor(**settings) 
+
+# # Optionally enable some image types or filters:
+# extractor.enableImageTypeByName('Wavelet')
+# extractor.enableImageTypeByName('LoG', customArgs={'sigma':[3.0]})
+# extractor.enableImageTypeByName('Square')
+# extractor.enableImageTypeByName('SquareRoot')
+# extractor.enableImageTypeByName('Exponential')
+# extractor.enableImageTypeByName('Logarithm')
 
 # Obtain radiomics properties
 print("Active features:")
@@ -40,11 +49,15 @@ for cls, features in six.iteritems(extractor.enabledFeatures):
   if features is None or len(features) == 0:
     features = [f for f, deprecated in six.iteritems(featureClasses[cls].getFeatureNames()) if not deprecated]
   for f in features:
-    print(f)
+    print('*',cls,f)
     # print(getattr(featureClasses[cls], 'get%sFeatureValue' % f).__doc__)
 
 print('Extraction parameters:\n\t', extractor.settings)
 print('Enabled features:\n\t', extractor.enabledFeatures)  # Still the default parameters
+
+print('Enabled input images:')
+for imageType in extractor.enabledImagetypes.keys():
+    print('\t' + imageType)
 
 # %% Import all files from patients
 print("Importing Nifti files (ventilation and mask) and 'defects' file.")
@@ -124,8 +137,8 @@ mask_defect_sitk_control = sitk.GetImageFromArray(mask_defect_control)
 print("Calculating features")
 featureVector = extractor.execute(imageName_control, mask_defect_sitk_control)
 
-# for featureName in featureVector.keys():
-#   print("Computed feature: %s " % (featureName))
+for featureName in featureVector.keys():
+  print("Computed feature: %s " % (featureName))
 
 df = pd.DataFrame(featureVector.keys(),columns = ['Features'])
 df_2 = pd.DataFrame(featureVector.values(),columns = ['Measurements'])
